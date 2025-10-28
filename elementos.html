@@ -52,7 +52,7 @@
         .app-container {
             width: 100%;
             max-width: 500px;
-           
+            
             background-color: transparent; 
             padding: 1rem; 
         }
@@ -113,7 +113,7 @@
             transform: translateX(20px);
         }
 
-   
+    
         #search-input {
             width: 100%;
             padding: 1rem;
@@ -138,7 +138,7 @@
             box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2), 0 4px 10px var(--shadow-color);
         }
 
-       
+        
         #results-container {
             margin-top: 1.5rem;
             min-height: 250px;
@@ -166,7 +166,7 @@
             font-weight: 500;
         }
 
-      
+    
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -266,7 +266,7 @@
 </head>
 <body>
 
-  
+    
     <div class="app-container">
         <h1>ElementQuery</h1>
         
@@ -284,9 +284,9 @@
         </div>
     </div>
 
-  
+    
     <script>
-       
+        
         const elements = [
             { "atomicNumber": 1, "symbol": "H", "name": "Hydrogen", "nombre": "Hidrógeno", "atomicMass": "1.008", "category": "reactive nonmetal", "categoria": "No metal reactivo", "phase": "Gas", "fase": "Gas" },
             { "atomicNumber": 2, "symbol": "He", "name": "Helium", "nombre": "Helio", "atomicMass": "4.0026", "category": "noble gas", "categoria": "Gas noble", "phase": "Gas", "fase": "Gas" },
@@ -388,7 +388,7 @@
             { "atomicNumber": 98, "symbol": "Cf", "name": "Californium", "nombre": "Californio", "atomicMass": "(251)", "category": "actinide", "categoria": "Actínido", "phase": "Solid", "fase": "Sólido" },
             { "atomicNumber": 99, "symbol": "Es", "name": "Einsteinium", "nombre": "Einstenio", "atomicMass": "(252)", "category": "actinide", "categoria": "Actínido", "phase": "Solid", "fase": "Sólido" },
             { "atomicNumber": 100, "symbol": "Fm", "name": "Fermium", "nombre": "Fermio", "atomicMass": "(257)", "category": "actinide", "categoria": "Actínido", "phase": "Solid", "fase": "Sólido" },
-            { "atomicNumber": 101, "symbol": "Md", "name": "Mendelevium", "nombre": "Mendelevio", "atomicMass": "(258)", "category": "actinide", "categoria": "Actínido", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 101, "symbol": "Md", "name": "Mendelevium", "nombre": "Mendelevio", "atomicMass": "(258)", "category":"actinide", "categoria": "Actínido", "phase": "Solid", "fase": "Sólido" },
             { "atomicNumber": 102, "symbol": "No", "name": "Nobelium", "nombre": "Nobelio", "atomicMass": "(259)", "category": "actinide", "categoria": "Actínido", "phase": "Solid", "fase": "Sólido" },
             { "atomicNumber": 103, "symbol": "Lr", "name": "Lawrencium", "nombre": "Lawrencio", "atomicMass": "(262)", "category": "actinide", "categoria": "Actínido", "phase": "Solid", "fase": "Sólido" },
             { "atomicNumber": 104, "symbol": "Rf", "name": "Rutherfordium", "nombre": "Rutherfordio", "atomicMass": "(267)", "category": "transition metal", "categoria": "Metal de transición", "phase": "Solid", "fase": "Sólido" },
@@ -422,14 +422,14 @@
             'unknown': 'unknown'
         };
         
-      
+    
         const searchInput = document.getElementById('search-input');
         const resultsContainer = document.getElementById('results-container');
         const langToggle = document.getElementById('lang-toggle');
         const langLabelEs = document.getElementById('lang-label-es');
         const langLabelEn = document.getElementById('lang-label-en');
 
-        
+        <!-- el error estaba aqui -->
         let currentLanguage = 'es'; 
         let currentElement = null;
     
@@ -494,7 +494,7 @@
                 </div>
             `;
             
-           
+            
             resultsContainer.style.borderColor = 'transparent';
             resultsContainer.style.borderStyle = 'solid';
         }
@@ -509,7 +509,7 @@
                 return;
             }
 
-          
+            
             const match = elements.find(el =>
                 el.name.toLowerCase() === searchTerm ||
                 el.nombre.toLowerCase() === searchTerm ||
@@ -553,7 +553,7 @@
             }
         }
 
-       
+        
 
         
         document.addEventListener('DOMContentLoaded', () => {
