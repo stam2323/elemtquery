@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ElementQuery Pro</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --card-color: #ffffff;
+            --shadow-color: rgba(0, 0, 0, 0.08);
+            --accent-color: #007aff;
+            --text-color: #1a1a1a;
+            --text-light: #6b6b6b;
+            --border-color: #e0e0e0;
+            
+            /* Colores de Categorías */
+            --alkali-metal: #ffadad;
+            --alkaline-earth-metal: #ffd6a5;
+            --lanthanide: #fdffb6;
+            --actinide: #caffbf;
+            --transition-metal: #9bf6ff;
+            --post-transition-metal: #a0c4ff;
+            --metalloid: #bdb2ff;
+            --reactive-nonmetal: #ffc6ff;
+            --noble-gas: #fffffc;
+            --unknown: #e0e0e0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 500px;
+           
+            background-color: transparent; 
+            padding: 1rem; 
+        }
+
+        h1 {
+            text-align: center;
+            font-weight: 900;
+            font-size: 2.5rem;
+            color: var(--accent-color);
+            letter-spacing: -1.5px;
+            margin-bottom: 1.5rem;
+        }
+
+        /* --- Interruptor de Idioma --- */
+        .lang-switcher {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-light);
+        }
+
+        .lang-toggle {
+            display: none; 
+        }
+
+        .toggle-label {
+            position: relative;
+            display: block;
+            width: 44px;
+            height: 24px;
+            background-color: var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .toggle-label::after {
+            content: '';
+            position: absolute;
+            left: 3px;
+            top: 3px;
+            width: 18px;
+            height: 18px;
+            background-color: white;
+            border-radius: 50%;
+            transition: transform 0.2s ease;
+        }
+
+        .lang-toggle:checked + .toggle-label {
+            background-color: var(--accent-color);
+        }
+
+        .lang-toggle:checked + .toggle-label::after {
+            transform: translateX(20px);
+        }
+
+   
+        #search-input {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1.1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background-color: var(--card-color); 
+            color: var(--text-color);
+            font-weight: 500;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 10px var(--shadow-color);
+        }
+
+        #search-input::placeholder {
+            color: var(--text-light);
+            font-weight: 400;
+        }
+
+        #search-input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2), 0 4px 10px var(--shadow-color);
+        }
+
+       
+        #results-container {
+            margin-top: 1.5rem;
+            min-height: 250px;
+            border-radius: 16px;
+            border: 1px dashed var(--border-color);
+            padding: 1.5rem;
+            transition: border-color 0.3s ease;
+            background-color: var(--card-color); 
+            box-shadow: 0 4px 10px var(--shadow-color);
+        }
+        
+    
+        .placeholder-text, .not-found-text {
+            display: flex;
+            height: 220px;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-size: 1rem;
+            color: var(--text-light);
+        }
+        
+        .not-found-text {
+            color: #d90429; 
+            font-weight: 500;
+        }
+
+      
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-card {
+            animation: fadeIn 0.4s ease;
+            border-radius: 12px;
+            overflow: hidden; 
+        }
+        
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 1rem;
+        }
+        
+        .result-symbol {
+            font-size: 4.5rem;
+            font-weight: 900;
+            line-height: 1;
+            flex-shrink: 0;
+            margin-right: 1.5rem;
+            text-align: center;
+        }
+        
+        .result-name-number {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-light);
+        }
+
+        .result-name {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-top: 0.25rem;
+            line-height: 1.2;
+            color: var(--text-color);
+        }
+        
+        .result-category {
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 0.25rem 0.75rem;
+            border-radius: 99px;
+            display: inline-block;
+            margin-top: 0.75rem;
+            color: #333; 
+        }
+
+        .result-body {
+            background-color: #fdfdfd;
+            padding: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .result-details {
+            list-style: none;
+            font-size: 0.95rem;
+        }
+        
+        .result-details li {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid var(--bg-color);
+        }
+        
+        .result-details li:last-child {
+            border-bottom: none;
+        }
+        
+        .result-details span {
+            font-weight: 600;
+            color: var(--text-light);
+        }
+        
+        .result-details strong {
+            font-weight: 600;
+            color: var(--text-color);
+        }
+        
+        
+        .alkali-metal { background-color: var(--alkali-metal); }
+        .alkaline-earth-metal { background-color: var(--alkaline-earth-metal); }
+        .lanthanide { background-color: var(--lanthanide); }
+        .actinide { background-color: var(--actinide); }
+        .transition-metal { background-color: var(--transition-metal); }
+        .post-transition-metal { background-color: var(--post-transition-metal); }
+        .metalloid { background-color: var(--metalloid); }
+        .reactive-nonmetal { background-color: var(--reactive-nonmetal); }
+        .noble-gas { background-color: var(--noble-gas); }
+        .unknown { background-color: var(--unknown); }
+        
+    </style>
+</head>
+<body>
+
+  
+    <div class="app-container">
+        <h1>ElementQuery</h1>
+        
+        <div class="lang-switcher">
+            <span id="lang-label-es">Español</span>
+            <input type="checkbox" id="lang-toggle" class="lang-toggle">
+            <label for="lang-toggle" class="toggle-label"></label>
+            <span id="lang-label-en">English</span>
+        </div>
+
+        <input type="text" id="search-input" autocomplete="off">
+
+        <div id="results-container">
+            
+        </div>
+    </div>
+
+  
+    <script>
+       
+        const elements = [
+            { "atomicNumber": 1, "symbol": "H", "name": "Hydrogen", "nombre": "Hidrógeno", "atomicMass": "1.008", "category": "reactive nonmetal", "categoria": "No metal reactivo", "phase": "Gas", "fase": "Gas" },
+            { "atomicNumber": 2, "symbol": "He", "name": "Helium", "nombre": "Helio", "atomicMass": "4.0026", "category": "noble gas", "categoria": "Gas noble", "phase": "Gas", "fase": "Gas" },
+            { "atomicNumber": 3, "symbol": "Li", "name": "Lithium", "nombre": "Litio", "atomicMass": "6.94", "category": "alkali metal", "categoria": "Metal alcalino", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 4, "symbol": "Be", "name": "Beryllium", "nombre": "Berilio", "atomicMass": "9.0122", "category": "alkaline earth metal", "categoria": "Metal alcalinotérreo", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 5, "symbol": "B", "name": "Boron", "nombre": "Boro", "atomicMass": "10.81", "category": "metalloid", "categoria": "Metaloide", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 6, "symbol": "C", "name": "Carbon", "nombre": "Carbono", "atomicMass": "12.011", "category": "reactive nonmetal", "categoria": "No metal reactivo", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 7, "symbol": "N", "name": "Nitrogen", "nombre": "Nitrógeno", "atomicMass": "14.007", "category": "reactive nonmetal", "categoria": "No metal reactivo", "phase": "Gas", "fase": "Gas" },
+            { "atomicNumber": 8, "symbol": "O", "name": "Oxygen", "nombre": "Oxígeno", "atomicMass": "15.999", "category": "reactive nonmetal", "categoria": "No metal reactivo", "phase": "Gas", "fase": "Gas" },
+            { "atomicNumber": 9, "symbol": "F", "name": "Fluorine", "nombre": "Flúor", "atomicMass": "18.998", "category": "reactive nonmetal", "categoria": "No metal reactivo", "phase": "Gas", "fase": "Gas" },
+            { "atomicNumber": 10, "symbol": "Ne", "name": "Neon", "nombre": "Neón", "atomicMass": "20.180", "category": "noble gas", "categoria": "Gas noble", "phase": "Gas", "fase": "Gas" },
+            { "atomicNumber": 11, "symbol": "Na", "name": "Sodium", "nombre": "Sodio", "atomicMass": "22.990", "category": "alkali metal", "categoria": "Metal alcalino", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 12, "symbol": "Mg", "name": "Magnesium", "nombre": "Magnesio", "atomicMass": "24.305", "category": "alkaline earth metal", "categoria": "Metal alcalinotérreo", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 13, "symbol": "Al", "name": "Aluminum", "nombre": "Aluminio", "atomicMass": "26.982", "category": "post-transition metal", "categoria": "Metal de postransición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 14, "symbol": "Si", "name": "Silicon", "nombre": "Silicio", "atomicMass": "28.085", "category": "metalloid", "categoria": "Metaloide", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 15, "symbol": "P", "name": "Phosphorus", "nombre": "Fósforo", "atomicMass": "30.974", "category": "reactive nonmetal", "categoria": "No metal reactivo", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 16, "symbol": "S", "name": "Sulfur", "nombre": "Azufre", "atomicMass": "32.06", "category": "reactive nonmetal", "categoria": "No metal reactivo", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 17, "symbol": "Cl", "name": "Chlorine", "nombre": "Cloro", "atomicMass": "35.45", "category": "reactive nonmetal", "categoria": "No metal reactivo", "phase": "Gas", "fase": "Gas" },
+            { "atomicNumber": 18, "symbol": "Ar", "name": "Argon", "nombre": "Argón", "atomicMass": "39.948", "category": "noble gas", "categoria": "Gas noble", "phase": "Gas", "fase": "Gas" },
+            { "atomicNumber": 19, "symbol": "K", "name": "Potassium", "nombre": "Potasio", "atomicMass": "39.098", "category": "alkali metal", "categoria": "Metal alcalino", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 20, "symbol": "Ca", "name": "Calcium", "nombre": "Calcio", "atomicMass": "40.078", "category": "alkaline earth metal", "categoria": "Metal alcalinotérreo", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 21, "symbol": "Sc", "name": "Scandium", "nombre": "Escandio", "atomicMass": "44.956", "category": "transition metal", "categoria": "Metal de transición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 22, "symbol": "Ti", "name": "Titanium", "nombre": "Titanio", "atomicMass": "47.867", "category": "transition metal", "categoria": "Metal de transición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 23, "symbol": "V", "name": "Vanadium", "nombre": "Vanadio", "atomicMass": "50.942", "category": "transition metal", "categoria": "Metal de transición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 24, "symbol": "Cr", "name": "Chromium", "nombre": "Cromo", "atomicMass": "51.996", "category": "transition metal", "categoria": "Metal de transición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 25, "symbol": "Mn", "name": "Manganese", "nombre": "Manganeso", "atomicMass": "54.938", "category": "transition metal", "categoria": "Metal de transición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 26, "symbol": "Fe", "name": "Iron", "nombre": "Hierro", "atomicMass": "55.845", "category": "transition metal", "categoria": "Metal de transición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 27, "symbol": "Co", "name": "Cobalt", "nombre": "Cobalto", "atomicMass": "58.933", "category": "transition metal", "categoria": "Metal de transición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 28, "symbol": "Ni", "name": "Nickel", "nombre": "Níquel", "atomicMass": "58.693", "category": "transition metal", "categoria": "Metal de transición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 29, "symbol": "Cu", "name": "Copper", "nombre": "Cobre", "atomicMass": "63.546", "category": "transition metal", "categoria": "Metal de transición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 30, "symbol": "Zn", "name": "Zinc", "nombre": "Zinc", "atomicMass": "65.38", "category": "transition metal", "categoria": "Metal de transición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 31, "symbol": "Ga", "name": "Gallium", "nombre": "Galio", "atomicMass": "69.723", "category": "post-transition metal", "categoria": "Metal de postransición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 32, "symbol": "Ge", "name": "Germanium", "nombre": "Germanio", "atomicMass": "72.630", "category": "metalloid", "categoria": "Metaloide", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 33, "symbol": "As", "name": "Arsenic", "nombre": "Arsénico", "atomicMass": "74.922", "category": "metalloid", "categoria": "Metaloide", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 34, "symbol": "Se", "name": "Selenium", "nombre": "Selenio", "atomicMass": "78.971", "category": "reactive nonmetal", "categoria": "No metal reactivo", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 35, "symbol": "Br", "name": "Bromine", "nombre": "Bromo", "atomicMass": "79.904", "category": "reactive nonmetal", "categoria": "No metal reactivo", "phase": "Liquid", "fase": "Líquido" },
+            { "atomicNumber": 36, "symbol": "Kr", "name": "Krypton", "nombre": "Kriptón", "atomicMass": "83.798", "category": "noble gas", "categoria": "Gas noble", "phase": "Gas", "fase": "Gas" },
+            { "atomicNumber": 37, "symbol": "Rb", "name": "Rubidium", "nombre": "Rubidio", "atomicMass": "85.468", "category": "alkali metal", "categoria": "Metal alcalino", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 38, "symbol": "Sr", "name": "Strontium", "nombre": "Estroncio", "atomicMass": "87.62", "category": "alkaline earth metal", "categoria": "Metal alcalinotérreo", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 39, "symbol": "Y", "name": "Yttrium", "nombre": "Itrio", "atomicMass": "88.906", "category": "transition metal", "categoria": "Metal de transición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 40, "symbol": "Zr", "name": "Zirconium", "nombre": "Zirconio", "atomicMass": "91.224", "category": "transition metal", "categoria": "Metal de transición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 41, "symbol": "Nb", "name": "Niobium", "nombre": "Niobio", "atomicMass": "92.906", "category": "transition metal", "categoria": "Metal de transición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 42, "symbol": "Mo", "name": "Molybdenum", "nombre": "Molibdeno", "atomicMass": "95.96", "category": "transition metal", "categoria": "Metal de transición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 43, "symbol": "Tc", "name": "Technetium", "nombre": "Tecnecio", "atomicMass": "(98)", "category": "transition metal", "categoria": "Metal de transición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 44, "symbol": "Ru", "name": "Ruthenium", "nombre": "Rutenio", "atomicMass": "101.07", "category": "transition metal", "categoria": "Metal de transición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 45, "symbol": "Rh", "name": "Rhodium", "nombre": "Rodio", "atomicMass": "102.91", "category": "transition metal", "categoria": "Metal de transición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 46, "symbol": "Pd", "name": "Palladium", "nombre": "Paladio", "atomicMass": "106.42", "category": "transition metal", "categoria": "Metal de transición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 47, "symbol": "Ag", "name": "Silver", "nombre": "Plata", "atomicMass": "107.87", "category": "transition metal", "categoria": "Metal de transición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 48, "symbol": "Cd", "name": "Cadmium", "nombre": "Cadmio", "atomicMass": "112.41", "category": "transition metal", "categoria": "Metal de transición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 49, "symbol": "In", "name": "Indium", "nombre": "Indio", "atomicMass": "114.82", "category": "post-transition metal", "categoria": "Metal de postransición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 50, "symbol": "Sn", "name": "Tin", "nombre": "Estaño", "atomicMass": "118.71", "category": "post-transition metal", "categoria": "Metal de postransición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 51, "symbol": "Sb", "name": "Antimony", "nombre": "Antimonio", "atomicMass": "121.76", "category": "metalloid", "categoria": "Metaloide", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 52, "symbol": "Te", "name": "Tellurium", "nombre": "Telurio", "atomicMass": "127.60", "category": "metalloid", "categoria": "Metaloide", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 53, "symbol": "I", "name": "Iodine", "nombre": "Yodo", "atomicMass": "126.90", "category": "reactive nonmetal", "categoria": "No metal reactivo", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 54, "symbol": "Xe", "name": "Xenon", "nombre": "Xenón", "atomicMass": "131.29", "category": "noble gas", "categoria": "Gas noble", "phase": "Gas", "fase": "Gas" },
+            { "atomicNumber": 55, "symbol": "Cs", "name": "Caesium", "nombre": "Cesio", "atomicMass": "132.91", "category": "alkali metal", "categoria": "Metal alcalino", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 56, "symbol": "Ba", "name": "Barium", "nombre": "Bario", "atomicMass": "137.33", "category": "alkaline earth metal", "categoria": "Metal alcalinotérreo", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 57, "symbol": "La", "name": "Lanthanum", "nombre": "Lantano", "atomicMass": "138.91", "category": "lanthanide", "categoria": "Lantánido", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 58, "symbol": "Ce", "name": "Cerium", "nombre": "Cerio", "atomicMass": "140.12", "category": "lanthanide", "categoria": "Lantánido", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 59, "symbol": "Pr", "name": "Praseodymium", "nombre": "Praseodimio", "atomicMass": "140.91", "category": "lanthanide", "categoria": "Lantánido", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 60, "symbol": "Nd", "name": "Neodymium", "nombre": "Neodimio", "atomicMass": "144.24", "category": "lanthanide", "categoria": "Lantánido", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 61, "symbol": "Pm", "name": "Promethium", "nombre": "Prometio", "atomicMass": "(145)", "category": "lanthanide", "categoria": "Lantánido", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 62, "symbol": "Sm", "name": "Samarium", "nombre": "Samario", "atomicMass": "150.36", "category": "lanthanide", "categoria": "Lantánido", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 63, "symbol": "Eu", "name": "Europium", "nombre": "Europio", "atomicMass": "151.96", "category": "lanthanide", "categoria": "Lantánido", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 64, "symbol": "Gd", "name": "Gadolinium", "nombre": "Gadolinio", "atomicMass": "157.25", "category": "lanthanide", "categoria": "Lantánido", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 65, "symbol": "Tb", "name": "Terbium", "nombre": "Terbio", "atomicMass": "158.93", "category": "lanthanide", "categoria": "Lantánido", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 66, "symbol": "Dy", "name": "Dysprosium", "nombre": "Disprosio", "atomicMass": "162.50", "category": "lanthanide", "categoria": "Lantánido", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 67, "symbol": "Ho", "name": "Holmium", "nombre": "Holmio", "atomicMass": "164.93", "category": "lanthanide", "categoria": "Lantánido", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 68, "symbol": "Er", "name": "Erbium", "nombre": "Erbio", "atomicMass": "167.26", "category": "lanthanide", "categoria": "Lantánido", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 69, "symbol": "Tm", "name": "Thulium", "nombre": "Tulio", "atomicMass": "168.93", "category": "lanthanide", "categoria": "Lantánido", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 70, "symbol": "Yb", "name": "Ytterbium", "nombre": "Iterbio", "atomicMass": "173.05", "category": "lanthanide", "categoria": "Lantánido", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 71, "symbol": "Lu", "name": "Lutetium", "nombre": "Lutecio", "atomicMass": "174.97", "category": "lanthanide", "categoria": "Lantánido", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 72, "symbol": "Hf", "name": "Hafnium", "nombre": "Hafnio", "atomicMass": "178.49", "category": "transition metal", "categoria": "Metal de transición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 73, "symbol": "Ta", "name": "Tantalum", "nombre": "Tántalo", "atomicMass": "180.95", "category": "transition metal", "categoria": "Metal de transición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 74, "symbol": "W", "name": "Tungsten", "nombre": "Wolframio", "atomicMass": "183.84", "category": "transition metal", "categoria": "Metal de transición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 75, "symbol": "Re", "name": "Rhenium", "nombre": "Renio", "atomicMass": "186.21", "category": "transition metal", "categoria": "Metal de transición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 76, "symbol": "Os", "name": "Osmium", "nombre": "Osmio", "atomicMass": "190.23", "category": "transition metal", "categoria": "Metal de transición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 77, "symbol": "Ir", "name": "Iridium", "nombre": "Iridio", "atomicMass": "192.22", "category": "transition metal", "categoria": "Metal de transición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 78, "symbol": "Pt", "name": "Platinum", "nombre": "Platino", "atomicMass": "195.08", "category": "transition metal", "categoria": "Metal de transición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 79, "symbol": "Au", "name": "Gold", "nombre": "Oro", "atomicMass": "196.97", "category": "transition metal", "categoria": "Metal de transición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 80, "symbol": "Hg", "name": "Mercury", "nombre": "Mercurio", "atomicMass": "200.59", "category": "transition metal", "categoria": "Metal de transición", "phase": "Liquid", "fase": "Líquido" },
+            { "atomicNumber": 81, "symbol": "Tl", "name": "Thallium", "nombre": "Talio", "atomicMass": "204.38", "category": "post-transition metal", "categoria": "Metal de postransición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 82, "symbol": "Pb", "name": "Lead", "nombre": "Plomo", "atomicMass": "207.2", "category": "post-transition metal", "categoria": "Metal de postransición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 83, "symbol": "Bi", "name": "Bismuth", "nombre": "Bismuto", "atomicMass": "208.98", "category": "post-transition metal", "categoria": "Metal de postransición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 84, "symbol": "Po", "name": "Polonium", "nombre": "Polonio", "atomicMass": "(209)", "category": "post-transition metal", "categoria": "Metal de postransición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 85, "symbol": "At", "name": "Astatine", "nombre": "Astato", "atomicMass": "(210)", "category": "metalloid", "categoria": "Metaloide", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 86, "symbol": "Rn", "name": "Radon", "nombre": "Radón", "atomicMass": "(222)", "category": "noble gas", "categoria": "Gas noble", "phase": "Gas", "fase": "Gas" },
+            { "atomicNumber": 87, "symbol": "Fr", "name": "Francium", "nombre": "Francio", "atomicMass": "(223)", "category": "alkali metal", "categoria": "Metal alcalino", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 88, "symbol": "Ra", "name": "Radium", "nombre": "Radio", "atomicMass": "(226)", "category": "alkaline earth metal", "categoria": "Metal alcalinotérreo", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 89, "symbol": "Ac", "name": "Actinium", "nombre": "Actinio", "atomicMass": "(227)", "category": "actinide", "categoria": "Actínido", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 90, "symbol": "Th", "name": "Thorium", "nombre": "Torio", "atomicMass": "232.04", "category": "actinide", "categoria": "Actínido", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 91, "symbol": "Pa", "name": "Protactinium", "nombre": "Protactinio", "atomicMass": "231.04", "category": "actinide", "categoria": "Actínido", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 92, "symbol": "U", "name": "Uranium", "nombre": "Uranio", "atomicMass": "238.03", "category": "actinide", "categoria": "Actínido", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 93, "symbol": "Np", "name": "Neptunium", "nombre": "Neptunio", "atomicMass": "(237)", "category": "actinide", "categoria": "Actínido", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 94, "symbol": "Pu", "name": "Plutonium", "nombre": "Plutonio", "atomicMass": "(244)", "category": "actinide", "categoria": "Actínido", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 95, "symbol": "Am", "name": "Americium", "nombre": "Americio", "atomicMass": "(243)", "category": "actinide", "categoria": "Actínido", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 96, "symbol": "Cm", "name": "Curium", "nombre": "Curio", "atomicMass": "(247)", "category": "actinide", "categoria": "Actínido", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 97, "symbol": "Bk", "name": "Berkelium", "nombre": "Berkelio", "atomicMass": "(247)", "category": "actinide", "categoria": "Actínido", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 98, "symbol": "Cf", "name": "Californium", "nombre": "Californio", "atomicMass": "(251)", "category": "actinide", "categoria": "Actínido", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 99, "symbol": "Es", "name": "Einsteinium", "nombre": "Einstenio", "atomicMass": "(252)", "category": "actinide", "categoria": "Actínido", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 100, "symbol": "Fm", "name": "Fermium", "nombre": "Fermio", "atomicMass": "(257)", "category": "actinide", "categoria": "Actínido", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 101, "symbol": "Md", "name": "Mendelevium", "nombre": "Mendelevio", "atomicMass": "(258)", "category": "actinide", "categoria": "Actínido", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 102, "symbol": "No", "name": "Nobelium", "nombre": "Nobelio", "atomicMass": "(259)", "category": "actinide", "categoria": "Actínido", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 103, "symbol": "Lr", "name": "Lawrencium", "nombre": "Lawrencio", "atomicMass": "(262)", "category": "actinide", "categoria": "Actínido", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 104, "symbol": "Rf", "name": "Rutherfordium", "nombre": "Rutherfordio", "atomicMass": "(267)", "category": "transition metal", "categoria": "Metal de transición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 105, "symbol": "Db", "name": "Dubnium", "nombre": "Dubnio", "atomicMass": "(270)", "category": "transition metal", "categoria": "Metal de transición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 106, "symbol": "Sg", "name": "Seaborgium", "nombre": "Seaborgio", "atomicMass": "(271)", "category": "transition metal", "categoria": "Metal de transición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 107, "symbol": "Bh", "name": "Bohrium", "nombre": "Bohrio", "atomicMass": "(270)", "category": "transition metal", "categoria": "Metal de transición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 108, "symbol": "Hs", "name": "Hassium", "nombre": "Hasio", "atomicMass": "(277)", "category": "transition metal", "categoria": "Metal de transición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 109, "symbol": "Mt", "name": "Meitnerium", "nombre": "Meitnerio", "atomicMass": "(278)", "category": "unknown", "categoria": "Desconocido", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 110, "symbol": "Ds", "name": "Darmstadtium", "nombre": "Darmstatio", "atomicMass": "(281)", "category": "unknown", "categoria": "Desconocido", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 111, "symbol": "Rg", "name": "Roentgenium", "nombre": "Roentgenio", "atomicMass": "(282)", "category": "unknown", "categoria": "Desconocido", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 112, "symbol": "Cn", "name": "Copernicium", "nombre": "Copernicio", "atomicMass": "(285)", "category": "transition metal", "categoria": "Metal de transición", "phase": "Gas", "fase": "Gas" },
+            { "atomicNumber": 113, "symbol": "Nh", "name": "Nihonium", "nombre": "Nihonio", "atomicMass": "(286)", "category": "unknown", "categoria": "Desconocido", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 114, "symbol": "Fl", "name": "Flerovium", "nombre": "Flerovio", "atomicMass": "(289)", "category": "post-transition metal", "categoria": "Metal de postransición", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 115, "symbol": "Mc", "name": "Moscovium", "nombre": "Moscovio", "atomicMass": "(290)", "category": "unknown", "categoria": "Desconocido", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 116, "symbol": "Lv", "name": "Livermorium", "nombre": "Livermorio", "atomicMass": "(293)", "category": "unknown", "categoria": "Desconocido", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 117, "symbol": "Ts", "name": "Tennessine", "nombre": "Teneso", "atomicMass": "(294)", "category": "unknown", "categoria": "Desconocido", "phase": "Solid", "fase": "Sólido" },
+            { "atomicNumber": 118, "symbol": "Og", "name": "Oganesson", "nombre": "Oganesón", "atomicMass": "(294)", "category": "noble gas", "categoria": "Gas noble", "phase": "Gas", "fase": "Gas" }
+        ];
+
+        
+        const categoryColors = {
+            'alkali-metal': 'alkali-metal',
+            'alkaline-earth-metal': 'alkaline-earth-metal',
+            'lanthanide': 'lanthanide',
+            'actinide': 'actinide',
+            'transition-metal': 'transition-metal',
+            'post-transition-metal': 'post-transition-metal',
+            'metalloid': 'metalloid',
+            'reactive-nonmetal': 'reactive-nonmetal',
+            'noble-gas': 'noble-gas',
+            'unknown': 'unknown'
+        };
+        
+      
+        const searchInput = document.getElementById('search-input');
+        const resultsContainer = document.getElementById('results-container');
+        const langToggle = document.getElementById('lang-toggle');
+        const langLabelEs = document.getElementById('lang-label-es');
+        const langLabelEn = document.getElementById('lang-label-en');
+
+        n
+        let currentLanguage = 'es'; 
+        let currentElement = null;
+    
+        function showInitialMessage() {
+            const message = (currentLanguage === 'es')
+                ? 'Busca un elemento por nombre, símbolo o número atómico.'
+                : 'Search for an element by name, symbol, or atomic number.';
+            resultsContainer.innerHTML = `<div class="placeholder-text">${message}</div>`;
+            resultsContainer.style.borderColor = 'var(--border-color)';
+            resultsContainer.style.borderStyle = 'dashed';
+        }
+
+        function showNotFound(term) {
+            const message = (currentLanguage === 'es')
+                ? `No se encontraron resultados para "<strong>${term}</strong>".`
+                : `No results found for "<strong>${term}</strong>".`;
+            resultsContainer.innerHTML = `<div class="not-found-text">${message}</div>`;
+            resultsContainer.style.borderColor = '#d90429';
+            resultsContainer.style.borderStyle = 'solid';
+        }
+
+        function displayElement(element) {
+            currentElement = element; 
+            const lang = currentLanguage;
+
+            
+            const name = (lang === 'es') ? element.nombre : element.name;
+            const category = (lang === 'es') ? element.categoria : element.category;
+            const phase = (lang === 'es') ? element.fase : element.phase;
+
+            
+            const labels = (lang === 'es')
+                ? { mass: 'Masa Atómica', phase: 'Fase' }
+                : { mass: 'Atomic Mass', phase: 'Phase' };
+
+            
+            const colorClass = categoryColors[element.category.replace(/ /g, '-').toLowerCase()] || 'unknown';
+
+            
+            resultsContainer.innerHTML = `
+                <div class="result-card">
+                    <div class="result-header ${colorClass}">
+                        <div class="result-symbol">${element.symbol}</div>
+                        <div style="text-align: right;">
+                            <div class="result-name-number">#${element.atomicNumber}</div>
+                            <h2 class="result-name">${name}</h2>
+                            <span class="result-category ${colorClass}">${category}</span>
+                        </div>
+                    </div>
+                    <div class="result-body">
+                        <ul class="result-details">
+                            <li>
+                                <span>${labels.mass}</span>
+                                <strong>${element.atomicMass}</strong>
+                            </li>
+                            <li>
+                                <span>${labels.phase}</span>
+                                <strong>${phase}</strong>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+            
+           
+            resultsContainer.style.borderColor = 'transparent';
+            resultsContainer.style.borderStyle = 'solid';
+        }
+
+
+        function searchElement(term) {
+            const searchTerm = term.trim().toLowerCase();
+
+            if (searchTerm === '') {
+                currentElement = null; 
+                showInitialMessage();
+                return;
+            }
+
+          
+            const match = elements.find(el =>
+                el.name.toLowerCase() === searchTerm ||
+                el.nombre.toLowerCase() === searchTerm ||
+                el.symbol.toLowerCase() === searchTerm ||
+                el.atomicNumber.toString() === searchTerm
+            );
+
+            if (match) {
+                displayElement(match);
+            } else {
+                currentElement = null;
+                showNotFound(term);
+            }
+        }
+        
+        function updateLanguageUI() {
+            
+            searchInput.placeholder = (currentLanguage === 'es')
+                ? 'Buscar (ej. Oro, Au, 79)'
+                : 'Search (e.g. Gold, Au, 79)';
+            
+            
+            if (currentLanguage === 'es') {
+                langLabelEs.style.fontWeight = '700';
+                langLabelEs.style.color = 'var(--text-color)';
+                langLabelEn.style.fontWeight = '500';
+                langLabelEn.style.color = 'var(--text-light)';
+            } else {
+                langLabelEs.style.fontWeight = '500';
+                langLabelEs.style.color = 'var(--text-light)';
+                langLabelEn.style.fontWeight = '700';
+                langLabelEn.style.color = 'var(--text-color)';
+            }
+            
+            
+            if (currentElement) {
+                displayElement(currentElement);
+            } else {
+                
+                searchElement(searchInput.value);
+            }
+        }
+
+       
+
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            langToggle.checked = false;
+            currentLanguage = 'es';
+            updateLanguageUI();
+        });
+
+        
+        langToggle.addEventListener('change', () => {
+            currentLanguage = langToggle.checked ? 'en' : 'es';
+            updateLanguageUI();
+        });
+
+        
+        searchInput.addEventListener('input', () => {
+            searchElement(searchInput.value);
+        });
+
+    </script>
+</body>
+</html>
